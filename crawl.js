@@ -1,21 +1,23 @@
 const { JSDOM } = require('jsdom');
 
-function crawlPage(url) {
-	fetch(url, {
-		mode: 'cors'
-	}).then(data => {
-		if (data.status >= 400) {
+async function crawlPage(url) {
+	try {
+		const response = await fetch(url);
+		if (response.status >= 400) {
 			console.error(`Unable to reach ${url}, check again or try again later...`);
 			return;
 		}
-		if (!data.headers.get('content-type').includes('text/html')) {
+		const contentType = response.headers.get('content-type');
+		if (!contentType.includes('text/html')) {
 			console.error(`Did not recieve HTML from request, check ${url} and try again...`);
 			return;
 		}
-		return data.text()
-	}).then(body => {
-		console.log(body);
-	});
+		const html = await response.text();
+		console.log(html);
+		return html;
+	} catch (error) {
+		console.error(error.message);
+	}
 }
 
 function normalizeURL(url) {
