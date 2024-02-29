@@ -1,5 +1,23 @@
 const { JSDOM } = require('jsdom');
 
+function crawlPage(url) {
+	fetch(url, {
+		mode: 'cors'
+	}).then(data => {
+		if (data.status >= 400) {
+			console.error(`Unable to reach ${url}, check again or try again later...`);
+			return;
+		}
+		if (!data.headers.get('content-type').includes('text/html')) {
+			console.error(`Did not recieve HTML from request, check ${url} and try again...`);
+			return;
+		}
+		return data.text()
+	}).then(body => {
+		console.log(body);
+	});
+}
+
 function normalizeURL(url) {
 	try {
 		const urlObject = new URL(url);
@@ -38,5 +56,6 @@ function getURLsFromHTML(htmlBody, baseURL) {
 
 module.exports = {
 	normalizeURL,
-	getURLsFromHTML
+	getURLsFromHTML,
+	crawlPage
 }
