@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/Luke-McMahon/web-crawler/issues"
   },
-  "homepage": "https://github.com/Luke-McMahon/web-crawler#readme"
+  "homepage": "https://github.com/Luke-McMahon/web-crawler#readme",
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
 }
