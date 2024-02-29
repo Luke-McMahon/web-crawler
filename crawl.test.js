@@ -4,7 +4,7 @@ const { normalizeURL, getURLsFromHTML } = require('./crawl.js');
 describe('GetURLsFromHTML', () => {
 	test('urls are retrieved', () => {
 		const html = '<html><body><a href="https://blog.boot.dev"><span>Go to Boot.dev</span></a></body></html>';
-		expect(getURLsFromHTML(html)).toContain('https://blog.boot.dev')
+		expect(getURLsFromHTML(html)).toContain('https://blog.boot.dev/')
 	})
 
 	test('multiple urls are retrieved', () => {
@@ -27,8 +27,31 @@ describe('GetURLsFromHTML', () => {
 <p><a href="/css/default.asp">CSS Tutorial</a></p> `;
 
 		expect(getURLsFromHTML(html, baseURL)).toContain('https://www.w3.org/css/default.asp');
-		// TODO: This is broken for links that don't have a starting /
-		// expect(getURLsFromHTML(html, baseURL)).toContain('https://www.w3.org/html_images.asp');
+		expect(getURLsFromHTML(html, baseURL)).not.toContain('https://www.w3.org/html_images.asp');
+	})
+
+	test('getURLsFromHTML relative', () => {
+	  const inputURL = 'https://blog.boot.dev'
+	  const inputBody = '<html><body><a href="/path/one"><span>Boot.dev></span></a></body></html>'
+	  const actual = getURLsFromHTML(inputBody, inputURL)
+	  const expected = [ 'https://blog.boot.dev/path/one' ]
+	  expect(actual).toEqual(expected)
+	})
+
+	test('getURLsFromHTML both', () => {
+	  const inputURL = 'https://blog.boot.dev'
+	  const inputBody = '<html><body><a href="/path/one"><span>Boot.dev></span></a><a href="https://other.com/path/one"><span>Boot.dev></span></a></body></html>'
+	  const actual = getURLsFromHTML(inputBody, inputURL)
+	  const expected = [ 'https://blog.boot.dev/path/one', 'https://other.com/path/one' ]
+	  expect(actual).toEqual(expected)
+	})
+
+	test('getURLsFromHTML handle error', () => {
+	  const inputURL = 'https://blog.boot.dev'
+	  const inputBody = '<html><body><a href="path/one"><span>Boot.dev></span></a></body></html>'
+	  const actual = getURLsFromHTML(inputBody, inputURL)
+	  const expected = [ ]
+	  expect(actual).toEqual(expected)
 	})
 })
 

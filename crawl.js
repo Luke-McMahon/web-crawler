@@ -15,15 +15,22 @@ function normalizeURL(url) {
 }
 
 function getURLsFromHTML(htmlBody, baseURL) {
-	const dom = new JSDOM(htmlBody);
-	const a = dom.window.document.querySelectorAll('a');
+	const dom = new JSDOM(htmlBody)
+	const a = dom.window.document.querySelectorAll('a')
 	const result = [];
-	a.forEach(tag => {
-		const url = tag.getAttribute('href');
-		if (url[0] === '/') {
-			result.push(`${baseURL}${url}`);
+	a.forEach(link =>  {
+		if (link.href[0] === '/') {
+			try {
+				result.push(new URL(link.href, baseURL).href)
+			} catch (err){
+				console.log(`${err.message}: ${link.href}`)
+			}
 		} else {
-			result.push(tag.getAttribute('href'))
+			try {
+				result.push(new URL(link.href).href)
+			} catch (err){
+				console.log(`${err.message}: ${link.href}`)
+			}
 		}
 	});
 	return result;
