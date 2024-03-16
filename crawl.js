@@ -1,27 +1,52 @@
 const { JSDOM } = require("jsdom");
 
-async function crawlPage(url) {
+async function crawlPage(baseURL, currentURL, pages) {
+  // If w're no longer on the same domain, leave.
+  const currentUrlObject = new URL(currentURL);
+  const baseUrlObject = new URL(baseURL);
+  if (currentUrlObject.hostname !== baseUrlObject.hostname) {
+    return pages;
+  }
+
+  const normalized = normalizeURL(currentURL);
+
+  if (pages[normalized] > 0) {
+    pages[normalized]++;
+    return pages;
+  }
+
+  pages[normalized] = 1;
+
+  console.log(`Crawling ${currentURL}`);
+  let html = "";
   try {
-    const response = await fetch(url);
+    const response = await fetch(currentURL);
     if (response.status >= 400) {
       console.error(
-        `Unable to reach ${url}, check again or try again later...`,
+        `Unable to reach ${currentURL}, check again or try again later...`,
       );
-      return;
+      return pages;
     }
     const contentType = response.headers.get("content-type");
     if (!contentType.includes("text/html")) {
       console.error(
         `Did not recieve HTML from request, check ${url} and try again...`,
       );
-      return;
+      return pages;
     }
-    const html = await response.text();
-    console.log(html);
-    return html;
+    html = await response.text();
   } catch (error) {
+    console.log(`Got up to ${currentURL}`);
     console.error(error.message);
   }
+
+  // Get the next run on URLs and crawl them
+  const next = getURLsFromHTML(html, baseURL);
+  for (const url of next) {
+    pages = await crawlPage(baseURL, url, pages);
+  }
+  // Finished, return our object
+  return pages;
 }
 
 function normalizeURL(url) {
