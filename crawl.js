@@ -17,7 +17,6 @@ async function crawlPage(baseURL, currentURL, pages) {
 
   pages[normalized] = 1;
 
-  console.log(`Crawling ${currentURL}`);
   let html = "";
   try {
     const response = await fetch(currentURL);
@@ -36,8 +35,7 @@ async function crawlPage(baseURL, currentURL, pages) {
     }
     html = await response.text();
   } catch (error) {
-    console.log(`Got up to ${currentURL}`);
-    console.error(error.message);
+    console.error(`Error on ${currentURL}: ${error.message}`);
   }
 
   // Get the next run on URLs and crawl them
